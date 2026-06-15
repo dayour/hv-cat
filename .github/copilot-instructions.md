@@ -34,6 +34,16 @@ Rules for fixing errors:
 * Further investigation of the codebase or through tools is always allowed.
 <!-- </highest-priority-rules> -->
 
+## First Session Checklist
+
+Use this short checklist before making edits:
+
+* Read `README.md`, `CONTRIBUTING.md`, `package.json`, and `.github/CUSTOM-AGENTS.md` to understand the product, contribution workflow, validation commands, and available agent roles.
+* Match the files you plan to edit against `.github/instructions/**` `applyTo` globs and read the applicable instruction files before changing anything.
+* Prefer the existing `npm run ...` scripts for validation, packaging, and regeneration instead of calling underlying tools directly.
+* Do not edit generated or disposable outputs directly: `plugins/`, `extension/package*.json`, `extension/README*.md`, `logs/`, and `.copilot-tracking/`.
+* When you change `collections/*.collection.yml` or `collections/*.md`, also run `npm run plugin:generate`, `npm run extension:prepare`, `npm run extension:prepare:prerelease`, and `npm run plugin:validate`.
+
 <!-- <project-structure> -->
 ## Project Structure
 
@@ -198,6 +208,19 @@ Copilot Coding Agent uses a cloud-based GitHub Actions environment, separate fro
 * shellcheck for bash script validation (pre-installed on ubuntu-latest)
 * actionlint for GitHub Actions workflow validation
 * cosign for artifact manifest signing
+
+### Known Validation Caveat
+
+In this repository, `npm run lint:frontmatter` can fail in some cloud sessions with `ConvertFrom-Yaml cmdlet not found`, even though the setup workflow intends to preinstall `PowerShell-Yaml`.
+
+If that happens, install the missing module in the current user scope and rerun the command:
+
+```powershell
+Install-Module -Name PowerShell-Yaml -RequiredVersion 0.4.7 -Force -Scope CurrentUser
+npm run lint:frontmatter
+```
+
+If the PowerShell Gallery feed is unavailable in the current session, fall back to manual schema checks with `scripts/linting/schemas/schema-mapping.json` and the referenced schema file, or rerun the validation in the devcontainer or a fresh cloud runner after the setup workflow completes.
 
 ### Using npm Scripts
 
